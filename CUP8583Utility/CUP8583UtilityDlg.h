@@ -29,6 +29,7 @@ protected:
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
+	afx_msg LRESULT OnHotKey(WPARAM wParam,LPARAM lParam);//手动加入.  
 	DECLARE_MESSAGE_MAP()
 public:
 	CEdit m_ceOriginal8583Msg;
@@ -36,4 +37,8 @@ public:
 	afx_msg void OnEnChangeOriginal8583msg();
 	CEdit m_ceFieldContent;
 	afx_msg void OnEnChangeEdit1();
+	afx_msg void OnBnClickedBtnClear();
+	afx_msg void OnBnClickedBtnselect();
+	CString m_csOrig8583MsgCount;
+	afx_msg void OnClose();
 };

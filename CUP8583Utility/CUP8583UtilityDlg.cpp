@@ -57,6 +57,7 @@ END_MESSAGE_MAP()
 
 CCUP8583UtilityDlg::CCUP8583UtilityDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CCUP8583UtilityDlg::IDD, pParent)
+	, m_csOrig8583MsgCount(_T("0"))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -67,6 +68,7 @@ void CCUP8583UtilityDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_Original8583Msg, m_ceOriginal8583Msg);
 	DDX_Control(pDX, IDC_DE55, m_cdDE55);
 	DDX_Control(pDX, IDC_EDIT1, m_ceFieldContent);
+	DDX_Text(pDX, IDC_LBL_COUNT, m_csOrig8583MsgCount);
 }
 
 BEGIN_MESSAGE_MAP(CCUP8583UtilityDlg, CDialog)
@@ -76,6 +78,11 @@ BEGIN_MESSAGE_MAP(CCUP8583UtilityDlg, CDialog)
 	//}}AFX_MSG_MAP
 	ON_EN_CHANGE(IDC_Original8583Msg, &CCUP8583UtilityDlg::OnEnChangeOriginal8583msg)
 	ON_EN_CHANGE(IDC_EDIT1, &CCUP8583UtilityDlg::OnEnChangeEdit1)
+	ON_BN_CLICKED(IDC_BTN_CLEAR, &CCUP8583UtilityDlg::OnBnClickedBtnClear)
+	ON_BN_CLICKED(IDC_BTNSELECT, &CCUP8583UtilityDlg::OnBnClickedBtnselect)
+//	ON_STN_CLICKED(IDC_LBL_COUNT, &CCUP8583UtilityDlg::OnStnClickedLblCount)
+	ON_MESSAGE(WM_HOTKEY,&CCUP8583UtilityDlg::OnHotKey)//快捷键消息映射手动加入  
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 
@@ -108,6 +115,8 @@ BOOL CCUP8583UtilityDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
+	RegisterHotKey(GetSafeHwnd(),1001,MOD_CONTROL,'A');//F2键  
+
 	// TODO: Add extra initialization here
 	disp = &m_ceFieldContent;
 	dispDE55 = &m_cdDE55;
@@ -122,7 +131,6 @@ BOOL CCUP8583UtilityDlg::OnInitDialog()
 		GetDlgItem(i)->SetWindowText(str);
 		count ++;
 	}
-
 	dlg = this;
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -311,6 +319,10 @@ void CCUP8583UtilityDlg::OnEnChangeOriginal8583msg()
 
 	hexStringToByteArray(src8583Msg, &srcLen, buff+cusor);
 	parseISO8583Msg(src8583Msg, srcLen, (SaveFieldData) saveData);
+	CString strLen;
+	strLen.Format(_T("%d"), wcslen(text));
+	m_csOrig8583MsgCount.SetString(strLen);
+	UpdateData(FALSE);
 }
 
 
@@ -322,4 +334,39 @@ void CCUP8583UtilityDlg::OnEnChangeEdit1()
 	// with the ENM_CHANGE flag ORed into the mask.
 
 	// TODO:  Add your control notification handler code here
+}
+
+//相应快捷键的消息映射  
+LRESULT CCUP8583UtilityDlg::OnHotKey(WPARAM wParam,LPARAM lParam)  
+{  
+	if(wParam ==1001)  
+	{   
+		//MessageBox(_T("热键已经按下！"));  
+		//这里可以加上你按钮要执行的操作，或者直接调用按钮映射的消息函数  
+		OnBnClickedBtnselect();
+	}  
+	return 0;  
+}  
+void CCUP8583UtilityDlg::OnBnClickedBtnClear()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_ceOriginal8583Msg.SetSel(0, -1); // 选中所有字符
+	m_ceOriginal8583Msg.ReplaceSel(_T(""));
+}
+
+
+void CCUP8583UtilityDlg::OnBnClickedBtnselect()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData();
+	m_ceOriginal8583Msg.SetFocus();
+	m_ceOriginal8583Msg.SetSel(0,-1);
+}
+
+
+void CCUP8583UtilityDlg::OnClose()
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	UnregisterHotKey(GetSafeHwnd(),1001);//注销A键  
+	CDialog::OnClose();
 }
